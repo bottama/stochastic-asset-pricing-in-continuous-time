@@ -143,6 +143,11 @@ W = {str(scen): b[str(scen)].cumsum() for scen in range(1, scen_size + 1)}
 
 # Drift and Diffusion
 The drift is the longer-term trends and the Diffusion is the shorter-term fluctuations.
+The drift is mathematically described as:
+![equation](https://miro.medium.com/max/1306/1*w4sguejYqaErHWIep-bqgg.png)
+
+The diffusion is mathematically described as:
+![equation](https://miro.medium.com/max/564/1*e9f7cqi6URjsxmiAP7iwBg.png)
 ```python
 drift     = (mu - 0.5 * sigma ** 2) * t
 diffusion = {str(scen): sigma * W[str(scen)] for scen in range(1, scen_size + 1)}
@@ -151,6 +156,10 @@ diffusion = {str(scen): sigma * W[str(scen)] for scen in range(1, scen_size + 1)
 # Building the discrete-time GBM model
 The GBM model is the following:
 ![equation](https://miro.medium.com/max/582/1*H_Eos9XnaW2juxZRMpnfeQ.png)
+And it is such that each point is derived as:
+![equation](https://miro.medium.com/max/1216/1*2RX7xGm2tsdHdQ7iCV0qxw.png)
+![equation](https://miro.medium.com/max/994/1*SDAbCkgIwJ0tOlkfDnjhDw.png)
+![equation](https://miro.medium.com/max/1012/1*owMyxrczGKCw8ZllJ8wGIQ.png)
 
 ```python
 S = np.array([So * np.exp(drift + diffusion[str(scen)]) for scen in range(1, scen_size + 1)])
