@@ -161,7 +161,7 @@ Here is the plot of the Monte-Carlo Simulation:
 
 
 # Making predictions
-Finally, here are achieved the performance of the model by looking at the best and worst scenario simulated each day and averaging the expectations.
+Finally, here are achieved the performances of the model by looking at the best and worst scenario simulated each day and averaging the expectations.
 Since we don't know how the future looks like, according to the no-arbitrage conditions, we give same 50% chances to both scenarios.
 Then also the Mean Squared Error (MSE) is evaluated.
 ```python
