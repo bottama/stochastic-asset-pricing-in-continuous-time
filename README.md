@@ -25,10 +25,10 @@ A GBM is a continuous-time stochastic process in which a quantity follows a Brow
 It is an important example of stochastic processes satisfying a stochastic differential equation (SDE); in particular, it is used in mathematical finance to model stock prices in the Black–Scholes model.
 
 # Main variables
-We retrieve historical stock prices of a specific `stock_name` between `start_date` and `end_date`. 
-Then using our GBM model, we will get our simulations until `pred_end_date`.
+Here are retrieved historical stock prices of a specific `stock_name` between `start_date` and `end_date`. 
+Then using the GBM model are get the simulations until `pred_end_date`.
 The GBM model is then iterated over different possbile scenarios `scen_size`.
-We can play with these variables and create different settings.
+Feel free to play with these variables and create different settings.
 
 ```python
 # main variables
@@ -38,18 +38,18 @@ We can play with these variables and create different settings.
 # end_date      :   end date to download prices(yyyy/mm/dd)
 # pred_end_date :   date until which you want to predict price (yyyy/mm/dd)
 # scen_size     :   different possible scenarios
-stock_name = 'AAPL'
-start_date = '2010-01-01'
-end_date = '2020-10-31'
+stock_name    = 'AAPL'
+start_date    = '2010-01-01'
+end_date      = '2020-10-31'
 pred_end_date = '2020-12-31'
-scen_size = 10000
+scen_size     = 10000
 ```
 
 
 # GBM's input parameters
-Here are the input parameters that our GBM simulation model will take. 
+Here are the input parameters that this GBM simulation model will take. 
 I will use Apple’s stock prices from `2010-01-01` to `2020-10-31` make predictions up to `2020-12-31`. 
-Also, you should note that I talk about trading days when I explain things using dates. We assume that a week is composed of only the weekdays, meaning that what comes after Friday is Monday.
+Also, you should note that I talk about trading days when I explain things using dates. By assumption the week is composed of only the weekdays, meaning that what comes after Friday is Monday.
 ```python
 # Parameter Definitions
 
@@ -67,7 +67,7 @@ Also, you should note that I talk about trading days when I explain things using
 ### 1. So
 This is the initial stock price. 
 Forward stock price simulations take their roots from this initial stock price value. 
-We will multiply this initial value with some expressions to get predictions for each of the trading days.
+This initial value is multiplied with some expressions to get predictions for each of the trading days.
 In this case is the closing stock price on October 31, 2020.
 
 ```python
@@ -76,17 +76,17 @@ So = train_set[-1]
 
 ### 2. dt
 This is the time increment in the model. 
-It means the time unit that we assume, then the time increment in this model is 1 day. 
+It means the time unit assumed, then the time increment in this model is 1 day. 
 
 ```python
 dt = 1
 ```
 
 ### 3. T
-T denotes the length of our prediction time horizon. 
-We can infer the number of trading days using the `pred_end_date` variable we declared at the beginning of this section. 
-Using the code below, we can extract the number of trading days this model will predict stock prices for, by counting the weekdays between `(end_date + 1 day)` and `pred_end_date`. 
-What we need in our case is the number of trading days between 31 October 2020 and 31 December 2020.
+`T` denotes the length of the prediction time horizon. 
+The number of trading days is inferred using the `pred_end_date` variable declared at the beginning. 
+Using the code below, the number of trading days this model will predict stock prices for is extracted, by counting the weekdays between `(end_date + 1 day)` and `pred_end_date`. 
+In this case it is the number of trading days between 31 October 2020 and 31 December 2020.
 
 ```python
 n_of_wkdays = pd.date_range(start=pd.to_datetime(end_date,
@@ -104,34 +104,35 @@ N = T / dt
 ```
 
 ### 5. t
-This is an array where we show the time progression in our model.
+This is an array where are shown the time progression in this model.
 ```python
 t = np.arange(1, int(N) + 1)
 ```
 
 ### 6. mu
 This is the mean return of the stock prices within the historical date range selected. 
-Before calculating mu, we should calculate the return for each trading day. The calculation is below.
-We will then use mu in our drift component calculation. 
+Before calculating mu, it's necessary to evalute the return for each trading day
+`mu` is then used as the drift component. 
 It will have an effect on the long-term movement of the stock price.
+The calculation is below.
 ```python
 daily_returns = ((train_set / train_set.shift(1)) - 1)[1:]
-mu = np.mean(daily_returns)
+mu            = np.mean(daily_returns)
 ```
 
 ### 7. sigma
 This is the standard deviation of returns of the stock prices. 
 Sigma will contribute by scaling the magnitude of random shock so that the small fluctuations occur in accordance with the historical volatility of the stock prices. 
-We don’t want any irrelevant random values coming from the standard normal distribution. Below, you can see how sigma is calculated.
+No irrelevant random values coming from the standard normal distribution are added. Below, you can see how sigma is calculated.
 ```python
 sigma = np.std(daily_returns)
 ```
 
 ### 8. b
-This array is the array where we add randomness to the model.  
+This array is the array where randomness is add to the model.  
 ```python
 scen_size = 10000
-b = {str(scen): np.random.normal(0, 1, int(N)) for scen in range(1, scen_size + 1)}
+b         = {str(scen): np.random.normal(0, 1, int(N)) for scen in range(1, scen_size + 1)}
 ```
 
 ### 9. W
@@ -143,7 +144,7 @@ W = {str(scen): b[str(scen)].cumsum() for scen in range(1, scen_size + 1)}
 # Drift and Diffusion
 The drift is the longer-term trends and the Diffusion is the shorter-term fluctuations.
 ```python
-drift = (mu - 0.5 * sigma ** 2) * t
+drift     = (mu - 0.5 * sigma ** 2) * t
 diffusion = {str(scen): sigma * W[str(scen)] for scen in range(1, scen_size + 1)}
 ```
 
@@ -155,20 +156,25 @@ The GBM model is the following:
 S = np.array([So * np.exp(drift + diffusion[str(scen)]) for scen in range(1, scen_size + 1)])
 S = np.hstack((np.array([[So] for scen in range(scen_size)]), S)) 
 ```
+Here is the plot of the Monte-Carlo Simulation:
+![](monte-carlo-simulation.png)
+
 
 # Making predictions
-Finally we can achieve the performance of the model by looking at the best and worst scenario simulated each day and averaging the expectations.
-Since we don't know how the future looks like we give same 50% chances to both scenarios.
+Finally, here are achieved the performance of the model by looking at the best and worst scenario simulated each day and averaging the expectations.
+Since we don't know how the future looks like, according to the no-arbitrage conditions, we give same 50% chances to both scenarios.
 Then also the Mean Squared Error (MSE) is evaluated.
 ```python
-S_max = [S[:, i].max() for i in range(0, int(N))]
-S_min = [S[:, i].min() for i in range(0, int(N))]
-S_pred = .5 * np.array(S_max) + .5 * np.array(S_min)
-final_df = pd.DataFrame(data=[test_set.reset_index()['Adj Close'], S_pred],
-                        index=['real', 'pred']).T
+S_max          = [S[:, i].max() for i in range(0, int(N))]
+S_min          = [S[:, i].min() for i in range(0, int(N))]
+S_pred         = .5 * np.array(S_max) + .5 * np.array(S_min)
+final_df       = pd.DataFrame(data=[test_set.reset_index()['Adj Close'], S_pred],
+                              index=['real', 'pred']).T
 final_df.index = test_set.index
-mse = 1/len(final_df) * np.sum((final_df['pred'] - final_df['real']) ** 2)
+mse            = 1/len(final_df) * np.sum((final_df['pred'] - final_df['real']) ** 2)
 ```
+Here is the final plot:
+![](predicted-vs-real.png)
 
 
 # Conclusion
